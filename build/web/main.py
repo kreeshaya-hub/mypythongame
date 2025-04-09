@@ -16,10 +16,13 @@ GREEN = (0, 255, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GOLD = (255, 215, 0)
+YELLOW = (255, 255, 0)
+DARK_GREEN = (0, 200, 0)
 
 # Game settings
 clock = pygame.time.Clock()
 snake_speed = 10
+MARGIN_BLOCKS = 2  # margin from the wall (in blocks)
 
 # Fonts
 font = pygame.font.SysFont('Arial', 24)
@@ -31,7 +34,7 @@ skills = [
     {"name": "Figma", "icon": pygame.image.load("icons/Figma.png")},
     {"name": "React", "icon": pygame.image.load("icons/React.png")},
     {"name": "JavaScript", "icon": pygame.image.load("icons/JavaScript.png")},
-    {"name": "React Native", "icon": pygame.image.load("icons/react-native.png")},  
+    {"name": "React Native", "icon": pygame.image.load("icons/react-native.png")},
     {"name": "Adobe CC", "icon": pygame.image.load("icons/adobe-creative-cloud.png")},
     {"name": "Node.js", "icon": pygame.image.load("icons/nodejs.png")},
     {"name": "GitHub", "icon": pygame.image.load("icons/github.png")},
@@ -50,7 +53,7 @@ def draw_snake(body):
 
 
 def draw_border():
-    pygame.draw.rect(screen, WHITE, (0, 0, WIDTH, HEIGHT), 4)
+    pygame.draw.rect(screen, WHITE, (0, 0, WIDTH, HEIGHT), 6)
 
 
 def show_message(text, color=WHITE):
@@ -102,6 +105,61 @@ def show_game_won():
                     sys.exit()
 
 
+def get_random_position():
+    """Generates a random position that isn't too close to the wall."""
+    x = random.randrange(MARGIN_BLOCKS, (WIDTH // BLOCK_SIZE) - MARGIN_BLOCKS) * BLOCK_SIZE
+    y = random.randrange(MARGIN_BLOCKS, (HEIGHT // BLOCK_SIZE) - MARGIN_BLOCKS) * BLOCK_SIZE
+    return x, y
+
+
+def show_intro_screen():
+    button_rect = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 100, 200, 50)
+    button_pressed = False
+
+    while True:
+        screen.fill(BLACK)
+        draw_border()
+
+        title_text = big_font.render("Hi, This is my Snake Game!", True, GOLD)
+        screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, HEIGHT // 4))
+
+        instructions = [
+            "1. Use arrow keys on your keyboard to go in that direction.",
+            "2. Catch as many skills as you can to learn more about me.",
+            "3. Be careful of dashing into the wall or yourself! 😂",
+            "4. Enjoy my Game!!"
+        ]
+
+        for i, line in enumerate(instructions):
+            instr_text = font.render(line, True, WHITE)
+            screen.blit(instr_text, (WIDTH // 2 - instr_text.get_width() // 2, HEIGHT // 3 + i * 30))
+
+        # Button color changes on click
+        button_color = DARK_GREEN if button_pressed else GREEN
+        pygame.draw.rect(screen, button_color, button_rect)
+        button_text = font.render("Start Game", True, BLACK)
+        screen.blit(button_text, (
+            button_rect.centerx - button_text.get_width() // 2,
+            button_rect.centery - button_text.get_height() // 2
+        ))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if button_rect.collidepoint(event.pos):
+                    button_pressed = True
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if button_rect.collidepoint(event.pos) and button_pressed:
+                    return  # Start the game
+                button_pressed = False
+
+
 def main():
     snake_pos = [100, 100]
     snake_body = [list(snake_pos)]
@@ -109,8 +167,7 @@ def main():
 
     remaining_skills = skills.copy()
     current_skill = random.choice(remaining_skills)
-    skill_x = random.randrange(0, WIDTH - BLOCK_SIZE, BLOCK_SIZE)
-    skill_y = random.randrange(0, HEIGHT - BLOCK_SIZE, BLOCK_SIZE)
+    skill_x, skill_y = get_random_position()
 
     message = ""
     message_timer = 0
@@ -165,10 +222,9 @@ def main():
                     current_skill = None
                     won_timer_started = pygame.time.get_ticks()
                 else:
-                    message = f"You found {current_skill['name']}! More to go!"
+                    message = f"You found {current_skill['name']}!"
                     current_skill = random.choice(remaining_skills)
-                    skill_x = random.randrange(0, WIDTH - BLOCK_SIZE, BLOCK_SIZE)
-                    skill_y = random.randrange(0, HEIGHT - BLOCK_SIZE, BLOCK_SIZE)
+                    skill_x, skill_y = get_random_position()
 
         if not ate_skill:
             snake_body.pop()
@@ -183,10 +239,12 @@ def main():
             pygame.draw.rect(screen, WHITE, (skill_x, skill_y, BLOCK_SIZE, BLOCK_SIZE))
             screen.blit(current_skill["icon"], (skill_x, skill_y))
 
-        # Show scoreboard (top-left)
+        # Draw scoreboard
         score = len(skills) - len(remaining_skills)
-        score_text = font.render(f"Skills: {score} / {len(skills)}", True, WHITE)
-        screen.blit(score_text, (20, 20))
+        score_surface = font.render(f"Skills: {score} / {len(skills)}", True, YELLOW)
+        score_box = pygame.Rect(15, 15, score_surface.get_width() + 20, score_surface.get_height() + 10)
+        pygame.draw.rect(screen, WHITE, score_box, 2)
+        screen.blit(score_surface, (score_box.x + 10, score_box.y + 5))
 
         # Bottom message
         if message and pygame.time.get_ticks() - message_timer < 2000:
@@ -199,5 +257,6 @@ def main():
             show_game_won()
 
 
-# Start the game
+# Start with the intro screen
+show_intro_screen()
 main()
