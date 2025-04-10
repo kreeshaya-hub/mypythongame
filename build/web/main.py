@@ -6,7 +6,7 @@ pygame.init()
 
 # Screen settings
 WIDTH, HEIGHT = 1080, 720
-BLOCK_SIZE = 40
+BLOCK_SIZE = 60
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake Skills Game")
 
@@ -34,7 +34,7 @@ skills = [
     {"name": "Figma", "icon": pygame.image.load("icons/Figma.png")},
     {"name": "React", "icon": pygame.image.load("icons/React.png")},
     {"name": "JavaScript", "icon": pygame.image.load("icons/JavaScript.png")},
-    {"name": "React Native", "icon": pygame.image.load("icons/react-native.png")},
+    {"name": "Wordpress", "icon": pygame.image.load("icons/Wordpress.png")},
     {"name": "Adobe CC", "icon": pygame.image.load("icons/adobe-creative-cloud.png")},
     {"name": "Node.js", "icon": pygame.image.load("icons/nodejs.png")},
     {"name": "GitHub", "icon": pygame.image.load("icons/github.png")},
@@ -236,7 +236,7 @@ def main():
 
         # Draw current icon
         if current_skill:
-            pygame.draw.rect(screen, WHITE, (skill_x, skill_y, BLOCK_SIZE, BLOCK_SIZE))
+            # pygame.draw.rect(screen, WHITE, (skill_x, skill_y, BLOCK_SIZE, BLOCK_SIZE))
             screen.blit(current_skill["icon"], (skill_x, skill_y))
 
         # Draw scoreboard
